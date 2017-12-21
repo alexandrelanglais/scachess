@@ -39,9 +39,16 @@ class FenHelperTest extends FlatSpec with Matchers {
 
     val tree = SortedSet[Tile]() ++ board.position.tiles
     println(tree.mkString("\n"))
-//    assert(tiles === Set(Tile(ColorWhite, 7, 0, Some(Piece('r', ColorBlack, Rook)))))
+    //    assert(tiles === Set(Tile(ColorWhite, 7, 0, Some(Piece('r', ColorBlack, Rook)))))
 
     println(FenHelper.toFen(board))
     assert(FenHelper.toFen(board) === FenHelper.initialPos.split(" ")(0))
+  }
+  it should "be able to place various positions" in {
+    val fen1 = "6k1/5rb1/6Qp/1N2P3/8/1P3pP1/P4K1P/4R3 w - -"
+    val board = Board.loadFen(fen1)
+
+    println(FenHelper.toFen(board))
+    assert(FenHelper.toFen(board) === fen1.split(" ")(0))
   }
 }

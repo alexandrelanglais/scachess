@@ -81,6 +81,7 @@ final case class Board(
     fiftyMovesRule:   Int
 ) {
   def apply(rank: Int, file: Int): Option[Tile] = position.tiles.filter(t => t.rank == rank && t.file == file).headOption
+
 }
 
 object Board {
@@ -95,4 +96,6 @@ object Board {
 
     Board(position, posHistory, sideToMove, castlingsAllowed, enPassant, fiftyMovesRule)
   }
+
+  def loadFen(fen: String): Board = Board.init().copy(position = ChessPosition(FenHelper.fromFen(fen)))
 }
