@@ -39,22 +39,22 @@ object FenHelper {
         val fh =
           if (c.isDigit) {
             val l  = c.toString.toInt
-            val ts = (0 until l).flatMap(x => Set(Tile(ColorWhite, rank, file + x, None))).toSet
+            val ts = (0 until l).flatMap(x => Set(Tile(ColorWhite, Position(rank, file + x), None))).toSet
             FenHelper(ts, rank, file + l, l)
           } else {
             c match {
-              case 'r' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorBlack, Rook)))), rank, file + 1, 1)
-              case 'b' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorBlack, Bishop)))), rank, file + 1, 1)
-              case 'n' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorBlack, Knight)))), rank, file + 1, 1)
-              case 'q' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorBlack, Queen)))), rank, file + 1, 1)
-              case 'k' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorBlack, King)))), rank, file + 1, 1)
-              case 'p' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorBlack, Pawn)))), rank, file + 1, 1)
-              case 'R' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorWhite, Rook)))), rank, file + 1, 1)
-              case 'B' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorWhite, Bishop)))), rank, file + 1, 1)
-              case 'N' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorWhite, Knight)))), rank, file + 1, 1)
-              case 'Q' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorWhite, Queen)))), rank, file + 1, 1)
-              case 'K' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorWhite, King)))), rank, file + 1, 1)
-              case 'P' => FenHelper(Set(Tile(color, rank, file, Some(Piece(c, ColorWhite, Pawn)))), rank, file + 1, 1)
+              case 'r' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorBlack, Rook)))), rank, file + 1, 1)
+              case 'b' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorBlack, Bishop)))), rank, file + 1, 1)
+              case 'n' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorBlack, Knight)))), rank, file + 1, 1)
+              case 'q' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorBlack, Queen)))), rank, file + 1, 1)
+              case 'k' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorBlack, King)))), rank, file + 1, 1)
+              case 'p' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorBlack, Pawn)))), rank, file + 1, 1)
+              case 'R' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorWhite, Rook)))), rank, file + 1, 1)
+              case 'B' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorWhite, Bishop)))), rank, file + 1, 1)
+              case 'N' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorWhite, Knight)))), rank, file + 1, 1)
+              case 'Q' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorWhite, Queen)))), rank, file + 1, 1)
+              case 'K' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorWhite, King)))), rank, file + 1, 1)
+              case 'P' => FenHelper(Set(Tile(color, Position(rank, file), Some(Piece(c, ColorWhite, Pawn)))), rank, file + 1, 1)
               case '/' => FenHelper(Set(), rank - 1, 0, 0)
               case _   => FenHelper(Set(), rank - 1, 0, 0)
             }
@@ -76,18 +76,15 @@ object FenHelper {
     for (rank <- 7 to 0 by -1) {
       empty = 0
       for (file <- 0 to 7) {
-        board(rank, file) match {
-          case Some(tile) =>
-            tile.piece match {
-              case None => empty = empty + 1
-              case Some(piece) =>
-                if (empty == 0) fen append piece.fencode.toString
-                else {
-                  fen append (empty.toString + piece.fencode.toString)
-                  empty = 0
-                }
+        board(file, rank).piece match {
+          case None => empty = empty + 1
+          case Some(piece) => {
+            if (empty == 0) fen append piece.fencode.toString
+            else {
+              fen append (empty.toString + piece.fencode.toString)
+              empty = 0
             }
-          case None => println("oops")
+          }
         }
       }
       if (empty > 0) fen append empty

@@ -21,36 +21,39 @@
 package com.scachess
 
 import com.scachess.Coordinates._
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
+import com.scachess.Engine.board
 
-import scala.collection.immutable.SortedSet
-import scala.collection.immutable.TreeSet
+import scala.annotation.tailrec
+import scala.util.Random
 
-class FenHelperTest extends FlatSpec with Matchers  {
-  "fromFen" should "be able to place one piece" ignore {
-    val tiles = FenHelper.fromFen("r")
+object Engine extends App {
+  private val board = Board.init()
 
-    assert(tiles === Set(Tile(ColorWhite, Position(RANK_8, FILE_A), Some(Piece('r', ColorBlack, Rook)))))
+  @tailrec
+  private def playTestGame(board: Board, move: Int): Unit = {
+    val tile     = pickRandomTile(board)
+    val newBoard = moveRandomly(board, tile)
+    println(s"${FenHelper.toFen(newBoard)} w KQkq - 0 1")
+    if (move > 0) playTestGame(newBoard, move - 1)
   }
 
-  it should "be able to place the original board position" in {
-    val tiles = FenHelper.fromFen(FenHelper.initialPos)
-    val board = Board.init()
-
-    val tree = SortedSet[Tile]() ++ board.position.tiles
-    println(tree.mkString("\n"))
-    //    assert(tiles === Set(Tile(ColorWhite, 7, 0, Some(Piece('r', ColorBlack, Rook)))))
-
-    println(FenHelper.toFen(board))
-    assert(FenHelper.toFen(board) === FenHelper.initialPos.split(" ")(0))
+  private def pickRandomTile(board: Board) = {
+    val tilesWithPieces: Set[Tile] = board.position.tiles.filter(_.piece.nonEmpty)
+    val rnd = new Random()
+    tilesWithPieces.toVector(rnd.nextInt(tilesWithPieces.size))
   }
 
-  it should "be able to place various positions" in {
-    val fen1  = "6k1/5rb1/6Qp/1N2P3/8/1P3pP1/P4K1P/4R3 w - -"
-    val board = Board.loadFen(fen1)
-
-    println(FenHelper.toFen(board))
-    assert(FenHelper.toFen(board) === fen1.split(" ")(0))
+  private def moveRandomly(board: Board, tile: Tile): Board = {
+    val rnd = new Random()
+    tile.piece.fold(board)(piece => {
+      println(s"piece is $piece")
+      val moves = piece.getMoves(tile.pos)
+      println(s"moves are $moves")
+      val pick = moves.toVector(rnd.nextInt(moves.size))
+      board.move(tile, board(pick.file, pick.rank))
+    })
   }
+
+  playTestGame(board, 10)
+
 }

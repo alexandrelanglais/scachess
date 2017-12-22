@@ -40,6 +40,15 @@ case object Bishop extends PieceType
 case object Queen  extends PieceType
 case object King   extends PieceType
 
+final case class Position(
+    rank: Int,
+    file: Int
+) {
+  override def toString: String = {
+    s"${CoordinatesX.withValue(file).name}${CoordinatesY.withValue(rank).name}"
+  }
+}
+
 final case class CastlingAllowed(
     wks: Boolean,
     wqs: Boolean,
@@ -51,21 +60,18 @@ final case class EnPassant(
     tile: Option[Tile]
 )
 
-final case class Piece(
-    fencode:   Char,
-    color:     Color,
-    pieceType: PieceType
-)
-
 final case class Tile(
     color: Color,
-    rank:  Int,
-    file:  Int,
+    pos:   Position,
     piece: Option[Piece]
 ) extends Ordered[Tile] {
   override def compare(that: Tile): Int =
-    if (this.rank == that.rank) this.file - that.file
-    else that.rank - this.rank
+    if (this.pos.rank == that.pos.rank) this.pos.file - that.pos.file
+    else that.pos.rank - this.pos.rank
+
+  override def toString: String = {
+    pos.toString
+  }
 }
 
 final case class ChessPosition(
@@ -80,7 +86,26 @@ final case class Board(
     enPassant:        EnPassant,
     fiftyMovesRule:   Int
 ) {
-  def apply(rank: Int, file: Int): Option[Tile] = position.tiles.filter(t => t.rank == rank && t.file == file).headOption
+
+  def allThreatenedPieces(): Set[Tile] = {
+    position.tiles.filter(
+      tile => tile.piece.fold(false)(piece => piece.isThreatened(this)))
+  }
+
+  def move(startTile: Tile, endTile: Tile): Board = {
+    copy(position =
+      ChessPosition(position.tiles.map(
+        tile => {
+          if(tile == startTile) tile.copy(piece = None)
+          else if(tile == endTile) tile.copy(piece = startTile.piece)
+          else tile.copy()
+        }
+      ))
+    )
+  }
+
+  def apply(file: Int, rank: Int): Tile =
+    position.tiles.filter(t => t.pos.rank == rank && t.pos.file == file).toVector(0)
 
 }
 
